@@ -34,7 +34,7 @@ Ce projet est prêt à être poussé sur GitHub et est structuré de manière pr
 L'application suit une architecture modulaire et découplée :
 
 ```text
-infra/
+fil-rouge/
 ├── app.py                      # Point d'entrée principal (serveur Flask et API REST)
 ├── requirements.txt            # Dépendances du projet (uniquement Flask !)
 ├── database.db                 # Base de données SQLite (générée automatiquement)

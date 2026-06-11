@@ -1,0 +1,2 @@
+# Dépendances requises pour l'application Ymmo (Partie DEV)
+Flask>=3.0.0

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Ymmo - Plateforme Immobilière Intelligente{% endblock %}</title>
+
+    <!-- Meta SEO & Accessibilité -->
+    <meta name="description"
+        content="Découvrez Ymmo, la plateforme immobilière centralisée alliant puissance de l'IA pour l'estimation de biens et excellence opérationnelle sur tout le territoire national.">
+    <meta name="author" content="Ymmo Team - Bachelor 2 Ynov">
+
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- Header / Barre de Navigation Sémantique -->
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo" id="logo-link">
+                <span>Y</span> Ymmo
+            </a>
+
+            <nav class="nav-links" aria-label="Menu principal">
+                <a href="/" id="nav-home" class="{% if request.path == '/' %}active{% endif %}">Accueil</a>
+                <a href="/search" id="nav-search" class="{% if request.path == '/search' %}active{% endif %}">Nos
+                    Biens</a>
+                <a href="/estimation" id="nav-estimate"
+                    class="{% if request.path == '/estimation' %}active{% endif %}">Estimation IA</a>
+                <a href="/dashboard" id="nav-dashboard"
+                    class="{% if request.path == '/dashboard' %}active{% endif %}">Espace Pro</a>
+                <a href="/docs" id="nav-docs"
+                    class="{% if request.path == '/docs' %}active{% endif %}">Documentation</a>
+                {% if session.get('agent_id') %}
+                <a href="/logout" id="nav-logout" style="color: #f43f5e; font-weight: 600;">Déconnexion</a>
+                {% endif %}
+            </nav>
+        </div>
+    </header>
+
+    <!-- Zone principale sémantique -->
+    <main id="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer sémantique -->
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2026 Ymmo SAS. Tous droits réservés.</p>
+            <p style="font-size: 0.8rem; margin-top: 0.5rem; opacity: 0.7;">Projet Académique Ynov Informatique -
+                Bachelor 2 - UF INFRA & DEV</p>
+        </div>
+    </footer>
+
+    <!-- Theme Toggling & Premium Custom Dropdowns Logic -->
+    <script>
+        const themeToggle = document.getElementById('theme-toggle');
+        const themeIcon = document.getElementById('theme-icon');
+
+        // Charger le thème sauvegardé
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.body.classList.add('light-theme');
+            if (themeIcon) updateIconToMoon();
+        }
+
+        if (themeToggle) {
+            themeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+                const isLight = document.body.classList.contains('light-theme');
+                localStorage.setItem('theme', isLight ? 'light' : 'dark');
+
+                if (isLight) {
+                    if (themeIcon) updateIconToMoon();
+                } else {
+                    if (themeIcon) updateIconToSun();
+                }
+            });
+        }
+
+        function updateIconToMoon() {
+            if (themeIcon) {
+                themeIcon.innerHTML = `
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                `;
+            }
+        }
+
+        function updateIconToSun() {
+            if (themeIcon) {
+                themeIcon.innerHTML = `
+                    <circle cx="12" cy="12" r="5"></circle>
+                    <line x1="12" y1="1" x2="12" y2="3"></line>
+                    <line x1="12" y1="21" x2="12" y2="23"></line>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                    <line x1="1" y1="12" x2="3" y2="12"></line>
+                    <line x1="21" y1="12" x2="23" y2="12"></line>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                `;
+            }
+        }
+
+        // Custom Dropdown Initialization (Progressive Enhancement)
+        document.addEventListener('DOMContentLoaded', () => {
+            initCustomSelects();
+        });
+
+        function initCustomSelects() {
+            const selects = document.querySelectorAll('select.filter-control');
+            selects.forEach(select => {
+                if (select.classList.contains('custom-select-native')) return;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'custom-select-wrapper';
+                if (select.id) {
+                    wrapper.id = 'custom-' + select.id + '-wrapper';
+                }
+
+                // Insérer le wrapper dans le DOM
+                select.parentNode.insertBefore(wrapper, select);
+                wrapper.appendChild(select);
+                select.classList.add('custom-select-native');
+
+                // Créer le déclencheur personnalisé
+                const trigger = document.createElement('div');
+                trigger.className = 'custom-select-trigger';
+                trigger.setAttribute('tabindex', '0');
+
+                const triggerText = document.createElement('span');
+                triggerText.className = 'custom-select-trigger-text';
+                
+                const activeOption = select.querySelector('option[selected]') || select.options[select.selectedIndex] || select.options[0];
+                triggerText.textContent = activeOption ? activeOption.textContent : '';
+                trigger.appendChild(triggerText);
+
+                // Ajouter la flèche SVG stylisée
+                trigger.innerHTML += `
+                    <svg class="custom-select-arrow" viewBox="0 0 24 24" width="16" height="16">
+                        <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                `;
+                wrapper.appendChild(trigger);
+
+                // Créer la liste des options
+                const optionsContainer = document.createElement('div');
+                optionsContainer.className = 'custom-select-options';
+
+                Array.from(select.options).forEach(opt => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'custom-select-option';
+                    optionDiv.textContent = opt.textContent;
+                    optionDiv.setAttribute('data-value', opt.value);
+                    
+                    if (opt.disabled) {
+                        optionDiv.classList.add('disabled');
+                    }
+                    if (opt.value === select.value) {
+                        optionDiv.classList.add('selected');
+                    }
+
+                    optionDiv.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        
+                        optionsContainer.querySelectorAll('.custom-select-option').forEach(el => el.classList.remove('selected'));
+                        optionDiv.classList.add('selected');
+                        
+                        triggerText.textContent = opt.textContent;
+                        select.value = opt.value;
+                        
+                        // Déclencher les événements de modification sur l'élément natif
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                        select.dispatchEvent(new Event('input', { bubbles: true }));
+                        
+                        wrapper.classList.remove('open');
+                    });
+
+                    optionsContainer.appendChild(optionDiv);
+                });
+
+                wrapper.appendChild(optionsContainer);
+
+                // Gérer le clic pour ouvrir/fermer
+                trigger.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    document.querySelectorAll('.custom-select-wrapper').forEach(w => {
+                        if (w !== wrapper) w.classList.remove('open');
+                    });
+                    wrapper.classList.toggle('open');
+                });
+
+                // Clavier & Accessibilité
+                trigger.addEventListener('keydown', (e) => {
+                    if (e.key === ' ' || e.key === 'Enter') {
+                        e.preventDefault();
+                        trigger.click();
+                    } else if (e.key === 'Escape') {
+                        wrapper.classList.remove('open');
+                    }
+                });
+
+                // Synchroniser avec les modifications directes sur l'élément natif
+                select.addEventListener('change', () => {
+                    syncCustomSelect(select);
+                });
+            });
+
+            // Fermer si clic à l'extérieur
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.custom-select-wrapper')) {
+                    document.querySelectorAll('.custom-select-wrapper').forEach(w => w.classList.remove('open'));
+                }
+            });
+
+            // Gérer la réinitialisation des filtres
+            const resetBtn = document.getElementById('reset-filters');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', () => {
+                    setTimeout(() => {
+                        document.querySelectorAll('select.custom-select-native').forEach(syncCustomSelect);
+                    }, 0);
+                });
+            }
+        }
+
+        function syncCustomSelect(select) {
+            const wrapper = select.closest('.custom-select-wrapper');
+            if (!wrapper) return;
+
+            const opt = select.options[select.selectedIndex];
+            if (opt) {
+                const triggerText = wrapper.querySelector('.custom-select-trigger-text');
+                if (triggerText) triggerText.textContent = opt.textContent;
+
+                wrapper.querySelectorAll('.custom-select-option').forEach(el => {
+                    if (el.getAttribute('data-value') === select.value) {
+                        el.classList.add('selected');
+                    } else {
+                        el.classList.remove('selected');
+                    }
+                });
+            }
+        }
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

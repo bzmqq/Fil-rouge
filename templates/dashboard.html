@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+
+{% block title %}Espace Professionnel - Tableau de Bord Commercial - Ymmo{% endblock %}
+
+{% block content %}
+<section class="dashboard-container">
+    <div class="section-header" style="text-align: left; margin-bottom: 2.5rem;">
+        <h2>Tableau de Bord National Ymmo</h2>
+        <p>Espace de supervision commercial, analyse des ventes et gestion des prospects clients.</p>
+    </div>
+    
+    <!-- Ligne des indicateurs clés (KPIs) -->
+    <div class="kpi-row">
+        <div class="glass-panel kpi-card" id="kpi-card-volume" style="border-left: 4px solid var(--accent-primary);">
+            <h4>Volume d'affaires total</h4>
+            <div class="kpi-val" id="kpi-volume" style="color: var(--accent-primary-hover);">0 €</div>
+        </div>
+        <div class="glass-panel kpi-card" id="kpi-card-transactions" style="border-left: 4px solid var(--accent-secondary);">
+            <h4>Ventes Réalisées</h4>
+            <div class="kpi-val" id="kpi-transactions" style="color: var(--accent-secondary);">0</div>
+        </div>
+        <div class="glass-panel kpi-card" id="kpi-card-active" style="border-left: 4px solid var(--accent-success);">
+            <h4>Catalogue Actif</h4>
+            <div class="kpi-val" id="kpi-active" style="color: var(--accent-success);">0</div>
+        </div>
+        <div class="glass-panel kpi-card" id="kpi-card-leads" style="border-left: 4px solid var(--accent-warning);">
+            <h4>Prospects en attente</h4>
+            <div class="kpi-val" id="kpi-leads" style="color: var(--accent-warning);">0</div>
+        </div>
+    </div>
+    
+    <!-- Ligne des graphiques de statistiques (Data Analysis Visualizations) -->
+    <div class="charts-row">
+        <div class="glass-panel chart-panel">
+            <h3 style="margin-bottom: 1.5rem; font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85;">📈 Analyse des Tendances Historiques</h3>
+            <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="trendsChart"></canvas>
+            </div>
+        </div>
+        <div class="glass-panel chart-panel">
+            <h3 style="margin-bottom: 1.5rem; font-size: 1.15rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85;">🍕 Répartition Sectorielle par Type de Bien</h3>
+            <div style="position: relative; height: 300px; width: 100%;">
+                <canvas id="typeChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Palmarès Elite et Hot Zones Recommandées (IA) -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2rem; margin-bottom: 3.5rem;">
+        
+        <!-- Classement des agences -->
+        <div class="glass-panel">
+            <h3 style="margin-bottom: 1.25rem; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85;">🏢 Agences Performantes</h3>
+            <div style="overflow-x: auto;">
+                <table class="ranking-table">
+                    <tbody id="agencies-ranking">
+                        <!-- Rempli en JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Classement des agents -->
+        <div class="glass-panel">
+            <h3 style="margin-bottom: 1.25rem; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85;">👑 Conseillers d'Élite</h3>
+            <div style="overflow-x: auto;">
+                <table class="ranking-table">
+                    <tbody id="agents-ranking">
+                        <!-- Rempli en JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Recommandation Hot Zones (IA / Data Analysis) -->
+        <div>
+            <h3 style="margin-bottom: 1.25rem; font-size: 1.1rem; text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.85;">🔥 Zones d'achat à fort potentiel</h3>
+            <div style="display: flex; flex-direction: column; gap: 1rem;" id="hot-zones-list">
+                <!-- Rempli en JS -->
+            </div>
+        </div>
+        
+    </div>
+    
+    <!-- Table de gestion des leads de contact (CRM Intégré) -->
+    <div class="glass-panel" style="margin-top: 3rem;">
+        <h3 style="margin-bottom: 0.5rem; font-size: 1.3rem;">📋 Suivi commercial des prospects (CRM)</h3>
+        <p style="opacity: 0.7; font-size: 0.95rem; margin-bottom: 1.5rem;">Prenez contact avec les prospects intéressés par nos biens. Modifiez leur statut pour suivre le pipe commercial.</p>
+        
+        <div class="leads-table-container">
+            <table class="leads-table">
+                <thead>
+                    <tr>
+                        <th>Prospect</th>
+                        <th>Bien convoité</th>
+                        <th>Message d'intérêt</th>
+                        <th>Date de demande</th>
+                        <th>Action commerciale</th>
+                    </tr>
+                </thead>
+                <tbody id="leads-table-body" aria-live="polite">
+                    <!-- Rempli en JS -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<!-- Chargement de la bibliothèque CDN de graphiques hautement interactive Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Chargement du script du dashboard pro -->
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

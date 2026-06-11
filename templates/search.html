@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Nos Biens Immobiliers d'Exception - Ymmo{% endblock %}
+
+{% block content %}
+<section class="properties-section" style="margin-top: 3rem;">
+    <div class="section-header">
+        <h2>Catalogue de biens d'exception</h2>
+        <p>Utilisez les filtres multicritères pour trouver la perle rare au sein de notre parc immobilier.</p>
+    </div>
+
+    <div class="search-grid-layout">
+        <!-- Barre latérale de filtres avancés (Accessibilité & Ergonomie) -->
+        <aside class="filters-panel glass-panel" aria-label="Filtres de recherche">
+            <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem;">Filtres Avancés</h3>
+
+            <!-- Ville -->
+            <div class="filter-group">
+                <label for="filter-city">Ville / Secteur</label>
+                <select id="filter-city" class="filter-control">
+                    <option value="">Toutes les agences</option>
+                    {% for city in cities %}
+                    <option value="{{ city }}">{{ city }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <!-- Type de bien -->
+            <div class="filter-group">
+                <label for="filter-type">Type de Bien</label>
+                <select id="filter-type" class="filter-control">
+                    <option value="">Tous les types</option>
+                    <option value="maison">Maison / Villa</option>
+                    <option value="appartement">Appartement</option>
+                    <option value="bureau">Bureaux Professionnels</option>
+                    <option value="commercial">Local Commercial</option>
+                </select>
+            </div>
+
+            <!-- Prix maximum -->
+            <div class="filter-group">
+                <label for="filter-max-price">Budget Maximum (€)</label>
+                <input type="number" id="filter-max-price" class="filter-control" placeholder="Ex: 500000" min="0">
+            </div>
+
+            <!-- Surface minimum -->
+            <div class="filter-group">
+                <label for="filter-min-surface">Surface Minimale (m²)</label>
+                <input type="number" id="filter-min-surface" class="filter-control" placeholder="Ex: 80" min="0">
+            </div>
+
+            <!-- Pièces minimum -->
+            <div class="filter-group">
+                <label for="filter-rooms">Nombre de pièces min.</label>
+                <input type="number" id="filter-rooms" class="filter-control" placeholder="Ex: 4" min="0">
+            </div>
+
+            <!-- Actions -->
+            <button class="btn btn-secondary" id="reset-filters" style="width: 100%; margin-top: 1rem;">Réinitialiser
+                les filtres</button>
+        </aside>
+
+        <!-- Conteneur principal de la grille des biens chargés en AJAX -->
+        <div class="properties-container">
+            <div class="properties-grid" id="properties-grid" aria-live="polite">
+                <!-- Les cartes seront injectées dynamiquement par main.js -->
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Structure de la Modale de Détails & Contact Direct (Sémantique & Accessible) -->
+<div class="modal-overlay" id="detail-modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-content glass-panel"
+        style="max-width: 900px; padding: 2.5rem; position: relative; border-radius: var(--radius-lg);">
+
+        <!-- Bouton Fermer Modale -->
+        <button id="modal-close" class="modal-close-btn"
+            aria-label="Fermer la boîte de dialogue">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+
+        <!-- Contenu dynamique chargé en AJAX -->
+        <div id="modal-inner-content">
+            <!-- Injecté par main.js -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Charger main.js -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% endblock %}

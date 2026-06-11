@@ -65,7 +65,7 @@ Suivez ces instructions pour installer et lancer le projet localement :
 ### 1. Cloner le dépôt
 ```bash
 git clone <URL_DE_VOTRE_DEPOT_GITHUB>
-cd infra
+cd fil-rouge
 ```
 
 ### 2. Créer et activer un environnement virtuel (optionnel mais recommandé)

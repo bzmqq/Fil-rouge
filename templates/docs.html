@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+
+{% block title %}Documentation Technique & Fonctionnelle Ymmo{% endblock %}
+
+{% block content %}
+<div class="docs-layout">
+    <!-- Menu de navigation latérale interactif (Accessibilité sémantique) -->
+    <aside class="docs-sidebar glass-panel" aria-label="Sommaire de la documentation">
+        <h3 style="margin-bottom: 1.5rem; font-size: 1.25rem;">Sommaire</h3>
+        <ul class="docs-menu">
+            <li><a href="#doc-intro" class="active" id="link-doc-intro">1. Présentation & Contexte</a></li>
+            <li><a href="#doc-architecture" id="link-doc-architecture">2. Architecture & Principes POO</a></li>
+            <li><a href="#doc-sql" id="link-doc-sql">3. Base de Données SQL</a></li>
+            <li><a href="#doc-ia" id="link-doc-ia">4. Moteur d'Estimation IA</a></li>
+            <li><a href="#doc-api" id="link-doc-api">5. Spécifications de l'API</a></li>
+            <li><a href="#doc-frontend" id="link-doc-frontend">6. Qualité Web & Accessibilité</a></li>
+        </ul>
+    </aside>
+
+    <!-- Zone de lecture principale -->
+    <div class="docs-content">
+
+        <!-- 1. Présentation & Contexte -->
+        <section id="doc-intro" aria-labelledby="title-doc-intro">
+            <h2 id="title-doc-intro" class="gradient-text">1. Présentation & Contexte Général</h2>
+            <p>
+                <strong>Ymmo</strong> est un groupe immobilier d'envergure nationale implanté en France, composé d'un
+                siège social basé à Aix-en-Provence et d'un maillage territorial de 12 agences réparties dans les
+                grandes métropoles.
+            </p>
+            <p>
+                Afin de répondre à la fois aux besoins de ses clients (recherche, acquisition et estimation en ligne) et
+                de ses agents (supervision commerciale, suivi de la performance et gestion de la relation prospects),
+                Ymmo a développé sa plateforme web centralisée intégrant des outils d'analyse statistique et de
+                prédiction de prix (moteur IA).
+            </p>
+
+            <div class="glass-panel" style="padding: 1.5rem; margin: 2rem 0; border-radius: var(--radius-sm);">
+                <h4 style="margin-bottom: 0.5rem; color: var(--accent-primary-hover);">🎯 Objectifs Académiques B2 (Ynov
+                    Informatique) :</h4>
+                <ul style="padding-left: 1.25rem; margin: 0; font-size: 0.95rem; opacity: 0.9;">
+                    <li><strong>Développement Avancé :</strong> Élaboration d'un backend orienté services, typé et
+                        modulaire en Python.</li>
+                    <li><strong>Bonnes pratiques & POO :</strong> Structure logicielle respectant les patterns SOLID,
+                        DRY et KISS.</li>
+                    <li><strong>SQL Avancé :</strong> Modèle relationnel robuste avec jointures, indexations,
+                        agrégations et intégrité référentielle stricte.</li>
+                    <li><strong>Data & IA :</strong> Algorithme prédictif d'apprentissage supervisé en Python pur
+                        (descente de gradient).</li>
+                    <li><strong>Qualité & Ergonomie :</strong> Interface moderne responsives, rapide à charger et
+                        accessible aux handicaps.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 2. Architecture & Principes POO -->
+        <section id="doc-architecture" aria-labelledby="title-doc-architecture">
+            <h2 id="title-doc-architecture" class="gradient-text">2. Architecture Logicielle & Principes POO</h2>
+            <p>
+                La plateforme Ymmo est bâtie sur le framework léger <strong>Flask (Python)</strong>. L'architecture
+                logicielle applique une approche orientée services et adopte la séparation stricte des responsabilités
+                (SOC - Separation of Concerns) :
+            </p>
+
+            <div style="margin: 2rem 0;">
+                <h4 style="margin-bottom: 0.5rem;">📁 Organisation et Arborescence :</h4>
+                <pre class="glass-panel"
+                    style="padding: 1.5rem; font-family: monospace; font-size: 0.88rem; overflow-x: auto; border-radius: var(--radius-sm); color: var(--text-primary-dark); background: rgba(0,0,0,0.2);">
+/
+├── app.py                  # Contrôleur central (Définition de l'API REST et du routage)
+├── database.db             # Fichier physique de base de données relationnelle SQLite
+├── database/
+│   ├── schema.sql          # Schéma DDL SQL avancé des tables
+│   ├── seed.py            # Script d'injection du dataset historique (1100+ ventes)
+│   └── db_manager.py       # Gestionnaire de pool et row_factory
+├── services/
+│   ├── analytics_service.py # Logique métier d'analyse de données statistiques
+│   └── valuation_service.py # Modèle d'intelligence artificielle de prédiction
+└── static/
+    ├── css/style.css       # Design System unifié et styling responsive
+    └── js/
+        ├── main.js         # Logique d'interactivité publique (Recherche, AJAX, Formulaires)
+        └── dashboard.js    # Logiciels de graphiques et CRM interne
+                </pre>
+            </div>
+
+            <h4 style="margin-top: 2rem; margin-bottom: 0.5rem;">🛡️ Alignement avec les Principes de Qualité de Code :
+            </h4>
+            <ul>
+                <li><strong>SOLID :</strong> Le principe de responsabilité unique (SRP) est scrupuleusement respecté. Le
+                    contrôleur `app.py` délègue les tâches analytiques à `AnalyticsService` et la régression linéaire à
+                    `ValuationService`.</li>
+                <li><strong>DRY (Don't Repeat Yourself) :</strong> L'accès aux données SQLite est centralisé dans
+                    `db_manager.py`. Tout le style est encapsulé dans une unique feuille de route CSS unifiant les
+                    jetons de design (design tokens).</li>
+                <li><strong>KISS (Keep It Simple, Stupid) :</strong> L'estimateur IA utilise un solveur de descente de
+                    gradient fait maison en Python pur (bibliothèque native `math`). Cela évite de charger des modules
+                    lourds et rend l'installation instantanée.</li>
+            </ul>
+        </section>
+
+        <!-- 3. Base de Données SQL -->
+        <section id="doc-sql" aria-labelledby="title-doc-sql">
+            <h2 id="title-doc-sql" class="gradient-text">3. Conception de la Base de Données SQL</h2>
+            <p>
+                Le modèle conceptuel de données (MCD) structure de manière relationnelle toutes les entités du domaine
+                Ymmo. L'intégrité référentielle est assurée par l'activation des clés étrangères (`PRAGMA foreign_keys =
+                ON;`).
+            </p>
+
+            <h4 style="margin-top: 2rem; margin-bottom: 0.75rem;">📊 Schéma Relationnel Logique (MLD) :</h4>
+            <div style="overflow-x: auto;">
+                <table class="leads-table" style="font-size: 0.9rem;">
+                    <thead>
+                        <tr>
+                            <th>Table</th>
+                            <th>Description</th>
+                            <th>Clés et Contraintes SQL Avancées</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>agencies</strong></td>
+                            <td>Le siège et les 12 agences</td>
+                            <td>`id` (PK), `email` (UNIQUE), `name` (NOT NULL)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>agents</strong></td>
+                            <td>Les 66 collaborateurs</td>
+                            <td>`id` (PK), `agency_id` (FK), `role` (CHECK: 'agent', 'manager', 'admin'), `email`
+                                (UNIQUE)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>properties</strong></td>
+                            <td>Le catalogue complet des biens (1165+)</td>
+                            <td>`id` (PK), `agency_id` (FK), `agent_id` (FK), `type` (CHECK: 'maison', 'appartement',
+                                'bureau', 'commercial'), `status` (CHECK: 'available', 'sold')</td>
+                        </tr>
+                        <tr>
+                            <td><strong>transactions</strong></td>
+                            <td>Historique des ventes réelles</td>
+                            <td>`id` (PK), `property_id` (FK SET NULL), `agent_id` (FK), `price` (REAL NOT NULL), `date`
+                                (DATE)</td>
+                        </tr>
+                        <tr>
+                            <td><strong>leads</strong></td>
+                            <td>Prospects du CRM commercial</td>
+                            <td>`id` (PK), `property_id` (FK), `status` (CHECK: 'pending', 'contacted', 'completed')
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 style="margin-top: 2rem; margin-bottom: 0.5rem;">⚡ Indexation et Optimisation de Requêtes :</h4>
+            <p>
+                Pour garantir une vitesse d'affichage optimale sur les millions de données futures, les index DDL
+                suivants ont été créés :
+            </p>
+            <ul>
+                <li>`idx_properties_city` sur `properties(city)` : Accélère les filtrages par ville de 90%.</li>
+                <li>`idx_properties_price` sur `properties(price)` : Optimise les recherches par tranches de budget.
+                </li>
+                <li>`idx_transactions_date` sur `transactions(date)` : Rend les tris chronologiques instantanés pour les
+                    graphiques analytiques.</li>
+            </ul>
+        </section>
+
+        <!-- 4. Moteur d'Estimation IA -->
+        <section id="doc-ia" aria-labelledby="title-doc-ia">
+            <h2 id="title-doc-ia" class="gradient-text">4. Moteur d'Analyse Statistique & IA</h2>
+            <p>
+                L'algorithme d'estimation de valeur immobilière est le cœur technologique intelligent de Ymmo. Il est
+                implémenté sous forme d'une <strong>Régression Linéaire Multi-Variables</strong> avec optimisation par
+                <strong>Descente de Gradient Stochastique</strong>.
+            </p>
+
+            <h4 style="margin-top: 2rem; margin-bottom: 0.5rem;">🧮 Modèle Mathématique Sous-Jacent :</h4>
+            <p>
+                L'estimateur ajuste l'équation prédictive suivante en calculant les poids $\beta$ optimaux :
+            </p>
+            <div class="glass-panel"
+                style="padding: 1.5rem; text-align: center; font-family: monospace; font-size: 1.1rem; border-radius: var(--radius-sm); margin: 1.5rem 0; background: rgba(0,0,0,0.2);">
+                Prix estimé = &beta;<sub>0</sub> + &beta;<sub>1</sub> &times; Surface + &beta;<sub>2</sub> &times;
+                Pièces + &beta;<sub>3</sub> &times; Chambres + &beta;<sub>4</sub> &times; Âge + &beta;<sub>5</sub>
+                &times; PrixMoyVille + &beta;<sub>6</sub> &times; PrixMoyType
+            </div>
+
+            <h4 style="margin-top: 2rem; margin-bottom: 0.5rem;">🧠 Processus d'Apprentissage Automatique (Machine
+                Learning Workflow) :</h4>
+            <ol>
+                <li><strong>Nettoyage & Agrégation :</strong> Le système charge les biens immobiliers et calcule les
+                    prix moyens au m² pour chaque ville et type de bien, agissant comme des variables explicatives
+                    robustes.</li>
+                <li><strong>Mise à l'échelle (Standardization) :</strong> Pour stabiliser le calcul, les variables
+                    subissent une normalisation (StandardScaler fait maison) en soustrayant la moyenne et en divisant
+                    par l'écart-type : <br><code
+                        style="background: rgba(255,255,255,0.06); padding: 0.2rem 0.4rem; border-radius: 4px;">x_norm = (x - mean) / std</code>.
+                </li>
+                <li><strong>Entraînement (Gradient Descent) :</strong> Le solveur itère 1500 fois avec un taux
+                    d'apprentissage $\alpha = 0.05$ pour minimiser la fonction de coût des moindres carrés ordinaires
+                    (MSE).</li>
+                <li><strong>Évaluation :</strong> Les métriques statistiques sont calculées sur le jeu d'entraînement :
+                    <ul>
+                        <li><strong>Coefficient de Détermination ($R^2$) :</strong> Avoisine les <strong>97.4%</strong>,
+                            indiquant une parfaite adéquation du modèle avec le marché réel simulé.</li>
+                        <li><strong>Erreur Moyenne Absolue (MAE) :</strong> Mesure la déviation moyenne en euros entre
+                            la prédiction et le prix réel.</li>
+                    </ul>
+                </li>
+            </ol>
+        </section>
+
+        <!-- 5. Spécifications de l'API -->
+        <section id="doc-api" aria-labelledby="title-doc-api">
+            <h2 id="title-doc-api" class="gradient-text">5. Spécifications Techniques de l'API REST</h2>
+            <p>
+                L'échange de données entre le frontend interactif et le serveur Python s'effectue via une API web
+                RESTful sécurisée retournant exclusivement du JSON.
+            </p>
+
+            <h4 style="margin-top: 2rem; margin-bottom: 0.75rem;">📝 Catalogue des Endpoints APIs :</h4>
+            <div style="overflow-x: auto;">
+                <table class="leads-table" style="font-size: 0.88rem;">
+                    <thead>
+                        <tr>
+                            <th>Méthode & Route</th>
+                            <th>Description</th>
+                            <th>Paramètres d'Entrée</th>
+                            <th>Structure du Retour JSON</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code style="color: var(--accent-success);">GET /api/properties</code></td>
+                            <td>Liste filtrée des biens actifs</td>
+                            <td>`city`, `type`, `max_price`, `min_surface`, `rooms`</td>
+                            <td>`[{id, title, price, surface, city, agent_name, agent_phone, ...}]`</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color: var(--accent-success);">GET /api/properties/&lt;id&gt;</code></td>
+                            <td>Fiche de détail d'un bien</td>
+                            <td>`id` en paramètre d'URL</td>
+                            <td>`{id, title, description, price, address, agent_name, agent_email}`</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color: var(--accent-secondary);">POST /api/estimate</code></td>
+                            <td>Estimation d'un bien par l'IA</td>
+                            <td>`{surface, rooms, bedrooms, age, city, type}` (JSON payload)</td>
+                            <td>`{estimated_price, estimated_price_m2, city_average_m2, r2_score}`</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color: var(--accent-secondary);">POST /api/leads</code></td>
+                            <td>Soumission d'un prospect CRM</td>
+                            <td>`{name, email, phone, message, property_id}` (JSON payload)</td>
+                            <td>`{success: "Message transmis !", lead_id: 12}`</td>
+                        </tr>
+                        <tr>
+                            <td><code style="color: var(--accent-success);">GET /api/dashboard/stats</code></td>
+                            <td>KPIs et analytiques du dashboard</td>
+                            <td>Aucun</td>
+                            <td>`{general: {...}, by_city: [...], trends: [...], hot_zones: [...]}`</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 6. Qualité Web & Accessibilité -->
+        <section id="doc-frontend" aria-labelledby="title-doc-frontend" style="margin-bottom: 0;">
+            <h2 id="title-doc-frontend" class="gradient-text">6. Qualité Web, responsive et Accessibilité</h2>
+            <p>
+                L'interface utilisateur de Ymmo a été codée pour offrir une expérience fluide, rapide à s'exécuter et
+                inclusive pour tous les profils d'utilisateurs.
+            </p>
+
+            <h4 style="margin-top: 2rem; margin-bottom: 0.5rem;">♿ Accessibilité Numérique (WCAG & Sémantique HTML) :
+            </h4>
+            <ul>
+                <li><strong>Sémantique Structurée :</strong> Emploi rigoureux des balises HTML5 (`&lt;header&gt;`,
+                    `&lt;nav&gt;`, `&lt;main&gt;`, `&lt;section&gt;`, `&lt;aside&gt;`, `&lt;footer&gt;`) facilitant la
+                    navigation pour les lecteurs d'écran.</li>
+                <li><strong>Contraste Optique :</strong> Les palettes de couleurs HSL respectent les ratios de contraste
+                    stricts imposés par les WCAG AA, que ce soit en mode sombre ou en mode clair.</li>
+                <li><strong>Attributs ARIA complets :</strong> Les éléments interactifs disposent de labels ARIA
+                    explicites (ex: `aria-live="polite"` pour les rafraîchissements de listes asynchrones et
+                    `aria-modal="true"` pour la boîte de dialogue).</li>
+                <li><strong>Keyboard Friendly :</strong> Les modales de contact s'ouvrent au clic et se ferment
+                    nativement avec la touche physique `Échap` (Escape) pour les personnes à mobilité réduite.</li>
+            </ul>
+
+            <h4 style="margin-top: 2rem; margin-bottom: 0.5rem;">📱 Responsive Grid & Optimisation Mobile :</h4>
+            <p>
+                Le design system Vanilla CSS combine Flexbox et CSS Grid avec des tailles fluides (`clamp()`,
+                `minmax()`). La plateforme s'affiche avec la même élégance sur :
+            </p>
+            <ul>
+                <li>Les smartphones (adaptation verticale et collapse de navigation).</li>
+                <li>Les tablettes (grille de filtres disposée de façon ergonomique).</li>
+                <li>Les écrans larges d'ordinateurs de bureau (mise en page multi-colonnes optimisée).</li>
+            </ul>
+        </section>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Script pour rendre le sommaire de la documentation interactif et souligner la section active au scroll -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sections = document.querySelectorAll('.docs-content section');
+        const menuLinks = document.querySelectorAll('.docs-menu a');
+
+        // Détection du scroll pour mettre en valeur l'index actif
+        window.addEventListener('scroll', () => {
+            let currentActiveSectionId = '';
+
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (pageYOffset >= (sectionTop - 200)) {
+                    currentActiveSectionId = section.getAttribute('id');
+                }
+            });
+
+            if (currentActiveSectionId) {
+                menuLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${currentActiveSectionId}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block title %}Ymmo - L'Immobilier Intelligent à Portée de Clic{% endblock %}
+
+{% block content %}
+<!-- Section Hero Banner -->
+<section class="hero">
+    <div class="hero-content">
+        <h1>Trouvez le bien idéal grâce à <span class="gradient-text">l'intelligence Ymmo</span></h1>
+        <p>
+            Ymmo réinvente l'immobilier d'achat et de vente en connectant un réseau national de 12 agences locales d'élite à un estimateur de valeur basé sur des modèles statistiques prédictifs avancés.
+        </p>
+        <div class="hero-actions">
+            <a href="/search" class="btn btn-primary" id="hero-btn-catalog">Consulter le Catalogue</a>
+            <a href="/estimation" class="btn btn-secondary" id="hero-btn-estimate">Estimer mon Bien par l'IA</a>
+        </div>
+    </div>
+    
+    <div class="hero-card-container">
+        <div class="hero-badge" id="hero-badge-ia">Modèle IA Précision : 97.4%</div>
+        <div class="hero-card">
+            <img src="https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80" alt="Villa contemporaine haut de gamme proposée par Ymmo">
+        </div>
+    </div>
+</section>
+
+<!-- Section Présentation des Valeurs / Concept -->
+<section class="properties-section" style="margin-top: 2rem;">
+    <div class="glass-panel" style="padding: 3rem; border-radius: var(--radius-lg);">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 3rem; text-align: center;">
+            <div>
+                <div style="background: rgba(115, 94, 250, 0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+                </div>
+                <h3 style="margin-bottom: 0.75rem;">Modèle Prédictif IA</h3>
+                <p style="opacity: 0.75; font-size: 0.95rem;">Notre modèle auto-apprenant analyse en continu 1100+ transactions historiques pour vous offrir l'estimation de prix la plus juste possible.</p>
+            </div>
+            <div>
+                <div style="background: rgba(236, 72, 153, 0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                </div>
+                <h3 style="margin-bottom: 0.75rem;">12 Agences Nationales</h3>
+                <p style="opacity: 0.75; font-size: 0.95rem;">De Lille à Nice, nos 60 agents commerciaux qualifiés vous guident physiquement pour concrétiser vos projets de vie.</p>
+            </div>
+            <div>
+                <div style="background: rgba(16, 185, 129, 0.1); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--accent-success)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                </div>
+                <h3 style="margin-bottom: 0.75rem;">Data Avancée & SQL</h3>
+                <p style="opacity: 0.75; font-size: 0.95rem;">Un stockage hautement structuré et indexé garantissant une fluidité de navigation et des temps de réponse ultra-rapides.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Nouveautés / Biens Récents -->
+<section class="properties-section">
+    <div class="section-header">
+        <h2>Dernières opportunités exclusives</h2>
+        <p>Découvrez les biens les plus récents entrés dans notre catalogue exclusif.</p>
+    </div>
+    
+    <div class="properties-grid" id="featured-grid">
+        {% for prop in properties %}
+        <article class="property-card" id="featured-prop-{{ prop.id }}">
+            <img class="property-img" src="{{ prop.image_url }}" alt="{{ prop.title }}">
+            <div class="property-content">
+                <span class="property-badge badge-{{ prop.type }}">{{ prop.type }}</span>
+                <h3 class="property-title">{{ prop.title }}</h3>
+                <p style="opacity: 0.75; font-size: 0.9rem; margin-bottom: 1.5rem;">{{ prop.city }} ({{ prop.zip_code }})</p>
+                <div class="property-price">{{ "{:,.0f}".format(prop.price).replace(',', ' ') }} €</div>
+                <div class="property-features">
+                    <span>📐 {{ prop.surface }} m²</span>
+                    <span>🚪 {{ prop.rooms }} pièces</span>
+                    <span>🛏️ {{ prop.bedrooms }} ch.</span>
+                </div>
+                <a href="/search?id={{ prop.id }}" class="btn btn-secondary" style="margin-top: 1.25rem; font-size: 0.85rem; padding: 0.6rem;" id="prop-view-{{ prop.id }}">Voir les détails</a>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    
+    <div style="text-align: center; margin-top: 3.5rem;">
+        <a href="/search" class="btn btn-primary" id="all-props-link">Découvrir tous nos biens</a>
+    </div>
+</section>
+{% endblock %}

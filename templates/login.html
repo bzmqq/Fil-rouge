@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Connexion Espace Professionnel - Ymmo{% endblock %}
+
+{% block content %}
+<section style="max-width: 450px; margin: 6rem auto; padding: 0 1.5rem;">
+    <div class="glass-panel" style="padding: 3rem; border-radius: var(--radius-lg); text-align: center;">
+        <div style="background: rgba(115, 94, 250, 0.08); width: 80px; height: 80px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto; border: 1.5px solid rgba(115, 94, 250, 0.25);">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+            </svg>
+        </div>
+
+        <h3 style="margin-bottom: 0.5rem; font-size: 1.5rem;">Espace Professionnel</h3>
+        <p style="opacity: 0.7; font-size: 0.95rem; margin-bottom: 2rem;">Veuillez vous authentifier pour accéder au tableau de bord commercial national.</p>
+
+        {% if error %}
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color: #ef4444; padding: 0.75rem 1rem; border-radius: var(--radius-sm); margin-bottom: 1.5rem; font-size: 0.88rem; text-align: left;">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/login">
+            <!-- Email -->
+            <div class="filter-group" style="text-align: left;">
+                <label for="login-email">Adresse e-mail professionnelle</label>
+                <input type="email" id="login-email" name="email" class="filter-control" placeholder="ex: admin@ymmo.fr" required>
+            </div>
+
+            <!-- Password -->
+            <div class="filter-group" style="text-align: left; margin-bottom: 2rem;">
+                <label for="login-password">Mot de passe</label>
+                <input type="password" id="login-password" name="password" class="filter-control" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Se connecter</button>
+        </form>
+
+        <div style="margin-top: 2.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(0, 136, 144, 0.08); text-align: left; font-size: 0.85rem;">
+            <strong style="color: var(--accent-secondary); display: block; margin-bottom: 0.5rem;">📌 Comptes de test (Seeding) :</strong>
+            <ul style="padding-left: 1.25rem; margin: 0; opacity: 0.8; line-height: 1.5;">
+                <li>Admin : <code style="background: rgba(0,0,0,0.04); padding: 0.1rem 0.3rem; border-radius: 3px;">admin@ymmo.fr</code></li>
+                <li>Siège : <code style="background: rgba(0,0,0,0.04); padding: 0.1rem 0.3rem; border-radius: 3px;">siege@ymmo.fr</code></li>
+                <li>Mot de passe libre (ex: <code style="background: rgba(0,0,0,0.04); padding: 0.1rem 0.3rem; border-radius: 3px;">password</code>)</li>
+            </ul>
+        </div>
+    </div>
+</section>
+{% endblock %}

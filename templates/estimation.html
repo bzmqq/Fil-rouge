@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Estimation de Bien Immobilière par Intelligence Artificielle - Ymmo{% endblock %}
+
+{% block content %}
+<section class="properties-section" style="margin-top: 3rem;">
+    <div class="section-header">
+        <h2>Estimateur de Valeur par IA</h2>
+        <p>Notre moteur d'évaluation exploite l'historique des ventes réelles pour vous fournir une estimation
+            instantanée de haute précision.</p>
+    </div>
+
+    <div class="estimation-container">
+        <div class="glass-panel" style="border-radius: var(--radius-lg); padding: 3rem;">
+            <div class="estimation-form-grid">
+
+                <!-- Partie Gauche : Formulaire de saisie -->
+                <div>
+                    <h3 style="margin-bottom: 1.5rem; font-size: 1.35rem;">Caractéristiques du bien</h3>
+                    <form id="estimation-form">
+
+                        <!-- Type de bien -->
+                        <div class="filter-group">
+                            <label for="est-type">Type de propriété</label>
+                            <select id="est-type" name="type" class="filter-control" required>
+                                <option value="" disabled selected>Sélectionner le type</option>
+                                <option value="maison">Maison / Villa</option>
+                                <option value="appartement">Appartement</option>
+                                <option value="bureau">Bureaux Professionnels</option>
+                                <option value="commercial">Local Commercial</option>
+                            </select>
+                        </div>
+
+                        <!-- Ville -->
+                        <div class="filter-group">
+                            <label for="est-city">Ville / Localisation</label>
+                            <select id="est-city" name="city" class="filter-control" required>
+                                <option value="" disabled selected>Sélectionner la ville</option>
+                                {% for city in cities %}
+                                <option value="{{ city }}">{{ city }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Surface habitable -->
+                        <div class="filter-group">
+                            <label for="est-surface">Surface Habitable (m²)</label>
+                            <input type="number" id="est-surface" name="surface" class="filter-control"
+                                placeholder="Ex: 85" min="5" max="1000" step="0.1" required>
+                        </div>
+
+                        <!-- Pièces & Chambres -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                            <div>
+                                <label for="est-rooms"
+                                    style="display: block; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0.5rem; opacity: 0.8;">Pièces</label>
+                                <input type="number" id="est-rooms" name="rooms" class="filter-control"
+                                    placeholder="Ex: 4" min="1" max="25" required>
+                            </div>
+                            <div>
+                                <label for="est-bedrooms"
+                                    style="display: block; font-weight: 600; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 0.5rem; opacity: 0.8;">Chambres</label>
+                                <input type="number" id="est-bedrooms" name="bedrooms" class="filter-control"
+                                    placeholder="Ex: 2" min="0" max="20" required>
+                            </div>
+                        </div>
+
+                        <!-- Année de construction -->
+                        <div class="filter-group">
+                            <label for="est-year">Année de construction</label>
+                            <input type="number" id="est-year" name="year_built" class="filter-control"
+                                placeholder="Ex: 2012 (Optionnel)" min="1800" max="2026">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;"
+                            id="btn-run-estimate">Lancer l'évaluation IA</button>
+                    </form>
+                </div>
+
+                <!-- Partie Droite : Résultats dynamiques -->
+                <div class="estimation-results" id="estimation-results-panel">
+
+                    <!-- État initial -->
+                    <div id="results-idle">
+                        <div
+                            style="background: rgba(115, 94, 250, 0.05); width: 100px; height: 100px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem auto; border: 1px dashed var(--border-dark);">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
+                                fill="none" stroke="var(--accent-primary)" stroke-width="1.5" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </div>
+                        <h4 style="margin-bottom: 0.5rem;">Prêt pour l'analyse</h4>
+                        <p style="opacity: 0.7; font-size: 0.95rem; max-width: 320px; margin: 0 auto;">Remplissez les
+                            détails du bien à gauche et cliquez sur évaluer pour voir la prédiction de prix.</p>
+                    </div>
+
+                    <!-- État chargement -->
+                    <div id="results-loading" style="display: none;">
+                        <div class="loader-spinner"
+                            style="display: inline-block; width: 60px; height: 60px; border: 4px solid var(--border-dark); border-top-color: var(--accent-primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1.5rem;">
+                        </div>
+                        <h4>Entraînement & Estimation en cours</h4>
+                        <p style="opacity: 0.7; font-size: 0.95rem;">Exécution des moindres carrés ordinaires...</p>
+                    </div>
+
+                    <!-- État Affichage Résultat -->
+                    <div id="results-complete" style="display: none; width: 100%;">
+                        <div class="result-kpi">
+                            <h4>Prix de marché estimé</h4>
+                            <div class="price-display" id="res-price">0 €</div>
+                            <p style="font-size: 0.9rem; opacity: 0.85;" id="res-price-m2">Soit 0 € / m²</p>
+                        </div>
+
+                        <!-- Comparaison secteur -->
+                        <div class="glass-panel"
+                            style="padding: 1.25rem; border-radius: var(--radius-sm); text-align: left; margin-bottom: 1.5rem; border-color: rgba(255,255,255,0.05); background: rgba(0,0,0,0.1);">
+                            <div style="font-size: 0.85rem; opacity: 0.7; margin-bottom: 0.25rem;">Prix moyen du secteur
+                                (m²)</div>
+                            <strong style="font-size: 1.2rem; color: var(--text-primary-dark);" id="res-sector-avg">0
+                                €/m²</strong>
+                            <p style="font-size: 0.8rem; opacity: 0.6; margin-top: 0.25rem;" id="res-comparison-txt">
+                                Votre bien est évalué dans la moyenne du quartier.</p>
+                        </div>
+
+                        <p style="font-size: 0.8rem; opacity: 0.6; margin-bottom: 2rem;">
+                            Indice de confiance du modèle : <strong id="model-r2">{{ stats.r2 }}%</strong><br>
+                            Marge d'erreur moyenne (MAE) : <strong id="model-mae">{{
+                                "{:,.0f}".format(stats.mae).replace(',', ' ') }} €</strong>
+                        </p>
+
+                        <a href="/search" class="btn btn-primary" style="width: 100%;" id="res-btn-view-props">Consulter
+                            des biens similaires</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const form = document.getElementById('estimation-form');
+        const resultsIdle = document.getElementById('results-idle');
+        const resultsLoading = document.getElementById('results-loading');
+        const resultsComplete = document.getElementById('results-complete');
+
+        const resPrice = document.getElementById('res-price');
+        const resPriceM2 = document.getElementById('res-price-m2');
+        const resSectorAvg = document.getElementById('res-sector-avg');
+        const resComparisonTxt = document.getElementById('res-comparison-txt');
+        const modelR2 = document.getElementById('model-r2');
+        const modelMae = document.getElementById('model-mae');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // Basculer l'affichage vers Chargement
+            resultsIdle.style.display = 'none';
+            resultsComplete.style.display = 'none';
+            resultsLoading.style.display = 'block';
+
+            // Calculer l'âge du bien à partir de l'année
+            const yearBuiltVal = form.year_built.value;
+            const age = yearBuiltVal ? (2026 - parseInt(yearBuiltVal)) : 10; // 10 ans par défaut
+
+            const payload = {
+                type: form.type.value,
+                city: form.city.value,
+                surface: parseFloat(form.surface.value),
+                rooms: parseInt(form.rooms.value),
+                bedrooms: parseInt(form.bedrooms.value),
+                age: age
+            };
+
+            // Envoyer la requête AJAX à l'API d'estimation IA
+            fetch('/api/estimate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error("Erreur serveur lors de l'estimation");
+                    return res.json();
+                })
+                .then(data => {
+                    if (data.error) {
+                        alert(`⚠️ Erreur: ${data.error}`);
+                        resultsLoading.style.display = 'none';
+                        resultsIdle.style.display = 'block';
+                        return;
+                    }
+
+                    // Mettre à jour l'affichage des résultats
+                    const formattedPrice = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(data.estimated_price);
+                    resPrice.textContent = formattedPrice;
+
+                    const formattedPriceM2 = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(data.estimated_price_m2);
+                    resPriceM2.textContent = `Soit ${formattedPriceM2} / m²`;
+
+                    const formattedSectorM2 = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(data.city_average_m2);
+                    resSectorAvg.textContent = `${formattedSectorM2} / m²`;
+
+                    // Calculer la différence relative
+                    const diffPct = ((data.estimated_price_m2 - data.city_average_m2) / data.city_average_m2) * 100;
+                    if (diffPct > 5) {
+                        resComparisonTxt.textContent = `⚠️ Ce bien présente une valeur de +${Math.round(diffPct)}% supérieure au prix médian de ${payload.city}, s'expliquant par ses prestations et son ancienneté idéale.`;
+                        resComparisonTxt.style.color = '#f59e0b';
+                    } else if (diffPct < -5) {
+                        resComparisonTxt.textContent = `📉 Prix attractif de ${Math.round(Math.abs(diffPct))}% inférieur à la moyenne du secteur, représentant une excellente opportunité d'achat ou d'investissement.`;
+                        resComparisonTxt.style.color = '#10b981';
+                    } else {
+                        resComparisonTxt.textContent = `✅ Valeur parfaitement en adéquation avec les prix médians couramment pratiqués dans ce secteur.`;
+                        resComparisonTxt.style.color = '#9d8dfc';
+                    }
+
+                    modelR2.textContent = `${data.r2_score}%`;
+                    modelMae.textContent = new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(data.mae);
+
+                    // Afficher le panneau final
+                    resultsLoading.style.display = 'none';
+                    resultsComplete.style.display = 'block';
+                })
+                .catch(err => {
+                    console.error("Erreur d'estimation:", err);
+                    alert("⚠️ Une erreur réseau est survenue lors de l'estimation par l'IA. Veuillez vérifier vos entrées.");
+                    resultsLoading.style.display = 'none';
+                    resultsIdle.style.display = 'block';
+                });
+        });
+    });
+</script>
+{% endblock %}

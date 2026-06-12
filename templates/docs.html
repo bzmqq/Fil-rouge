@@ -11,9 +11,10 @@
             <li><a href="#doc-intro" class="active" id="link-doc-intro">1. Présentation & Contexte</a></li>
             <li><a href="#doc-architecture" id="link-doc-architecture">2. Architecture & Principes POO</a></li>
             <li><a href="#doc-sql" id="link-doc-sql">3. Base de Données SQL</a></li>
-            <li><a href="#doc-ia" id="link-doc-ia">4. Moteur d'Estimation IA</a></li>
-            <li><a href="#doc-api" id="link-doc-api">5. Spécifications de l'API</a></li>
-            <li><a href="#doc-frontend" id="link-doc-frontend">6. Qualité Web & Accessibilité</a></li>
+            <li><a href="#doc-infra" id="link-doc-infra">4. Architecture Infra & Synchro</a></li>
+            <li><a href="#doc-ia" id="link-doc-ia">5. Moteur d'Estimation IA</a></li>
+            <li><a href="#doc-api" id="link-doc-api">6. Spécifications de l'API</a></li>
+            <li><a href="#doc-frontend" id="link-doc-frontend">7. Qualité Web & Accessibilité</a></li>
         </ul>
     </aside>
 
@@ -166,9 +167,94 @@
             </ul>
         </section>
 
-        <!-- 4. Moteur d'Estimation IA -->
+        <!-- 4. Architecture Infra & Synchronisation de la Base de Données (Multi-VMs) -->
+        <section id="doc-infra" aria-labelledby="title-doc-infra">
+            <h2 id="title-doc-infra" class="gradient-text">4. Architecture Infra & Synchronisation de la Base de Données</h2>
+            <p>
+                Dans un environnement de production d'entreprise comme <strong>Ymmo</strong>, l'application est conçue pour être déployée au sein d'une architecture haute disponibilité composée de plusieurs machines virtuelles (VMs) de calcul réparties derrière un répartiteur de charge (Load Balancer).
+            </p>
+            <p>
+                Par défaut, l'application utilise une base de données <strong>SQLite locale</strong> (<code>database.db</code>). Dans un contexte multi-VMs, cela pose un problème majeur : chaque VM possède son propre fichier local indépendant, empêchant la synchronisation des données (ex. un bien enregistré sur la VM-1 ne sera pas visible sur la VM-2).
+            </p>
+
+            <h4 style="margin-top: 2rem; margin-bottom: 0.75rem;">🔄 Options de Synchronisation & Architecture de Stockage :</h4>
+            <div style="overflow-x: auto; margin-bottom: 2rem;">
+                <table class="leads-table" style="font-size: 0.9rem;">
+                    <thead>
+                        <tr>
+                            <th>Option d'architecture</th>
+                            <th>Description technique</th>
+                            <th>Avantages & Inconvénients</th>
+                            <th>Préconisation pour Ymmo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>1. SGBDR Centralisé<br>(PostgreSQL / MySQL)</strong></td>
+                            <td>
+                                Migration vers une base de données hébergée sur une VM dédiée ou un service Cloud managé. Les instances Flask s'y connectent via TCP/IP sécurisé.
+                            </td>
+                            <td>
+                                <span style="color: var(--accent-success);">🟢 Avantages :</span> Très robuste, standard de l'industrie, gestion native et sûre des accès concurrents, sauvegardes simplifiées.<br>
+                                <span style="color: var(--accent-secondary);">🔴 Inconvénients :</span> Ajoute un composant réseau à administrer, latence réseau minimale à l'écriture.
+                            </td>
+                            <td>
+                                <strong>Recommandé (Production)</strong><br>
+                                C'est la solution la plus propre et standard pour une plateforme professionnelle comme Ymmo.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>2. Réplication LiteFS<br>(Système de fichiers virtuel)</strong></td>
+                            <td>
+                                Utilisation de LiteFS pour intercepter les écritures SQLite et les répliquer au niveau bloc en temps réel entre les VMs via un modèle Primaire/Réplique.
+                            </td>
+                            <td>
+                                <span style="color: var(--accent-success);">🟢 Avantages :</span> Conserve la légèreté de SQLite sans serveur externe, temps de lecture instantanés (local).<br>
+                                <span style="color: var(--accent-secondary);">🔴 Inconvénients :</span> Configuration FUSE complexe sur Windows Server, gestion active du rôle Primaire/Réplique requise.
+                            </td>
+                            <td>
+                                <strong>Alternative viable</strong><br>
+                                Adapté si l'on souhaite conserver la base SQLite sans migrer le code SQL vers un autre SGBDR.
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>3. Volume Partagé Réseau<br>(NFS / GlusterFS)</strong></td>
+                            <td>
+                                Partage du fichier <code>database.db</code> sur un stockage réseau partagé monté sur toutes les VMs Flask.
+                            </td>
+                            <td>
+                                <span style="color: var(--accent-success);">🟢 Avantages :</span> Très simple à mettre en place sur l'infrastructure réseau existante.<br>
+                                <span style="color: var(--accent-danger, #ff4a4a);">🔴 Inconvénients (Majeur) :</span> SQLite gère très mal les verrous de fichiers sur le réseau (NFS). <strong>Risque critique de corruption de la base de données</strong> lors d'accès concurrents d'écriture.
+                            </td>
+                            <td>
+                                <strong style="color: var(--accent-danger, #ff4a4a);">À ÉVITER ABSOLUMENT</strong><br>
+                                Risque de perte de données et d'erreurs de verrouillage en cas d'écritures simultanées des agents.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4 style="margin-top: 2rem; margin-bottom: 0.5rem;">🌐 Alignement avec le Projet d'Infrastructure & Sécurité (INFRA) :</h4>
+            <p>
+                Le déploiement de cette application web s'inscrit au sein d'une infrastructure réseau et système d'entreprise sécurisée :
+            </p>
+            <ul>
+                <li>
+                    <strong>Active Directory & GPOs (Windows Server) :</strong> Centralisation de l'authentification des 66 agents immobiliers. Le dashboard pro peut se connecter à l'AD de l'entreprise (via LDAP) pour attribuer automatiquement les rôles (<em>admin</em>, <em>manager</em>, <em>agent</em>) et appliquer des stratégies de groupe limitant les droits des serveurs de développement.
+                </li>
+                <li>
+                    <strong>Réseau & VPN IPSec site à site :</strong> Le siège social basé à Aix-en-Provence héberge les infrastructures centrales (serveur de base de données principal, Active Directory). Les 12 agences réparties sur le territoire s'y connectent à travers un VPN IPSec site-à-site chiffré pour garantir la sécurité et la confidentialité des échanges de données CRM.
+                </li>
+                <li>
+                    <strong>Politique de Sécurité Réseau (Pare-feu & Filtrage) :</strong> Les serveurs Flask sont déployés dans une <strong>DMZ (Zone Démilitarisée)</strong> accessible depuis internet par les clients et agents. La base de données centralisée (PostgreSQL) est isolée dans un <strong>LAN privé / Zone de données sécurisée</strong>. Les règles du pare-feu n'autorisent que le trafic entrant sur le port standard de la DB (ex: port <code>5432</code> pour PostgreSQL) provenant exclusivement des adresses IP des serveurs Flask de la DMZ.
+                </li>
+            </ul>
+        </section>
+
+        <!-- 5. Moteur d'Estimation IA -->
         <section id="doc-ia" aria-labelledby="title-doc-ia">
-            <h2 id="title-doc-ia" class="gradient-text">4. Moteur d'Analyse Statistique & IA</h2>
+            <h2 id="title-doc-ia" class="gradient-text">5. Moteur d'Analyse Statistique & IA</h2>
             <p>
                 L'algorithme d'estimation de valeur immobilière est le cœur technologique intelligent de Ymmo. Il est
                 implémenté sous forme d'une <strong>Régression Linéaire Multi-Variables</strong> avec optimisation par
@@ -211,9 +297,9 @@
             </ol>
         </section>
 
-        <!-- 5. Spécifications de l'API -->
+        <!-- 6. Spécifications de l'API -->
         <section id="doc-api" aria-labelledby="title-doc-api">
-            <h2 id="title-doc-api" class="gradient-text">5. Spécifications Techniques de l'API REST</h2>
+            <h2 id="title-doc-api" class="gradient-text">6. Spécifications Techniques de l'API REST</h2>
             <p>
                 L'échange de données entre le frontend interactif et le serveur Python s'effectue via une API web
                 RESTful sécurisée retournant exclusivement du JSON.
@@ -266,9 +352,9 @@
             </div>
         </section>
 
-        <!-- 6. Qualité Web & Accessibilité -->
+        <!-- 7. Qualité Web & Accessibilité -->
         <section id="doc-frontend" aria-labelledby="title-doc-frontend" style="margin-bottom: 0;">
-            <h2 id="title-doc-frontend" class="gradient-text">6. Qualité Web, responsive et Accessibilité</h2>
+            <h2 id="title-doc-frontend" class="gradient-text">7. Qualité Web, responsive et Accessibilité</h2>
             <p>
                 L'interface utilisateur de Ymmo a été codée pour offrir une expérience fluide, rapide à s'exécuter et
                 inclusive pour tous les profils d'utilisateurs.

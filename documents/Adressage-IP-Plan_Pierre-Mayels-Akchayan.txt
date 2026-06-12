@@ -1,0 +1,38 @@
+
+================================================================================
+          PLAN D'ADRESSAGE IP - PROJET ARCHITECTURE INFRASTRUCTURE B2B
+================================================================================
+
+1. SEGMENTATION DES RÉSEAUX VIRTUELS (LAN SEGMENTS / HYPERVISEUR)
+--------------------------------------------------------------------------------
+• Segment 1 : "WAN-INTERNET"   -> Émulation du réseau public (Lien Inter-Site)
+• Segment 2 : "LAN-SIEGE"      -> Réseau interne du Siège Social
+• Segment 3 : "LAN-AGENCE"     -> Réseau interne de l'Agence Distante
+
+2. TABLEAU D'ADRESSAGE DE L'INFRASTRUCTURE
+--------------------------------------------------------------------------------
++-----------------------+-----------+-------------------+--------------------+-----------------+
+| Machine / Équipement  | Interface | Zone / Rôle       | Adresse IP / Masque| Passerelle (GW) |
++-----------------------+-----------+-------------------+--------------------+-----------------+
+| Routeur Linux (Siège) | ens33     | WAN (Faux Internet| 192.168.1.175 /24  | Aucune          |
+|                       | ens37     | LAN Siège         | 192.168.10.254 /24 | Aucune          |
++-----------------------+-----------+-------------------+--------------------+-----------------+
+| Serveur Windows AS    | Ethernet  | LAN Siège (AD/DNS)| 192.168.10.10 /24  | 192.168.10.254  |
++-----------------------+-----------+-------------------+--------------------+-----------------+
+| Serveur Windows Siège | Ethernet  | LAN Siège (Client)| 192.168.10.20 /24  | 192.168.10.254  |
++-----------------------+-----------+-------------------+--------------------+-----------------+
+| Agence Linux          | ens33     | WAN (Faux Internet| 192.168.1.176 /24  | Aucune          |
+|                       | ens37     | LAN Agence        | 192.168.11.254 /24 | Aucune          |
++-----------------------+-----------+-------------------+--------------------+-----------------+
+
+3. CONFIGURATION DES TUNNELS VPN (STRONGSWAN)
+--------------------------------------------------------------------------------
+• Extrémité Locale (Siège)   : 192.168.1.175
+• Extrémité Distante (Agence) : 192.168.1.176
+• Trafic Chiffré (Subnets)    : 192.168.10.0/24 <---> 192.168.11.0/24
+
+4. CONFIGURATION DES SERVICES DNS INTERNES
+--------------------------------------------------------------------------------
+• Serveur DNS Principal       : 192.168.10.10 (Serveur Windows AS)
+• Résolution du Domaine       : À configurer sur le serveur Active Directory
+================================================================================

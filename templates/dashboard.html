@@ -4,9 +4,14 @@
 
 {% block content %}
 <section class="dashboard-container">
-    <div class="section-header" style="text-align: left; margin-bottom: 2.5rem;">
-        <h2>Tableau de Bord National Ymmo</h2>
-        <p>Espace de supervision commercial, analyse des ventes et gestion des prospects clients.</p>
+    <div class="dashboard-header-row" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div class="section-header" style="text-align: left; margin: 0;">
+            <h2>Tableau de Bord National Ymmo</h2>
+            <p>Espace de supervision commercial, analyse des ventes et gestion des prospects clients.</p>
+        </div>
+        <button id="btn-add-property" class="btn btn-primary" style="display: flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.25rem; font-weight: 600;">
+            <span>➕ Ajouter un bien</span>
+        </button>
     </div>
     
     <!-- Ligne des indicateurs clés (KPIs) -->
@@ -105,6 +110,104 @@
         </div>
     </div>
 </section>
+
+<!-- Structure de la Modale pour Ajouter un Bien -->
+<div class="modal-overlay" id="add-property-modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-content glass-panel" style="max-width: 650px; padding: 2.5rem; position: relative; border-radius: var(--radius-lg); max-height: 90vh; overflow-y: auto;">
+        
+        <!-- Bouton Fermer Modale -->
+        <button id="add-property-modal-close" class="modal-close-btn" aria-label="Fermer la boîte de dialogue">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+
+        <h3 style="margin-bottom: 1.5rem; font-size: 1.4rem;" class="gradient-text">➕ Enregistrer un nouveau bien</h3>
+        
+        <form id="add-property-form">
+            <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="filter-group">
+                    <label for="prop-title">Titre de l'annonce</label>
+                    <input type="text" id="prop-title" name="title" class="filter-control" placeholder="Ex: Belle maison contemporaine" required>
+                </div>
+                <div class="filter-group">
+                    <label for="prop-type">Type de Bien</label>
+                    <select id="prop-type" name="type" class="filter-control" required style="height: 44px;">
+                        <option value="maison">Maison / Villa</option>
+                        <option value="appartement">Appartement</option>
+                        <option value="bureau">Bureaux</option>
+                        <option value="commercial">Local Commercial</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-group" style="margin-bottom: 1rem;">
+                <label for="prop-description">Description détaillée</label>
+                <textarea id="prop-description" name="description" class="filter-control" rows="3" placeholder="Description, orientation, quartier, etc..." required style="resize: none;"></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="filter-group">
+                    <label for="prop-price">Prix de vente (€)</label>
+                    <input type="number" id="prop-price" name="price" class="filter-control" placeholder="Ex: 350000" min="0" required>
+                </div>
+                <div class="filter-group">
+                    <label for="prop-surface">Surface habitable (m²)</label>
+                    <input type="number" id="prop-surface" name="surface" class="filter-control" placeholder="Ex: 120" min="0" required>
+                </div>
+                <div class="filter-group">
+                    <label for="prop-year-built">Année de construction</label>
+                    <input type="number" id="prop-year-built" name="year_built" class="filter-control" placeholder="Ex: 2015" min="1000" max="2100">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="filter-group">
+                    <label for="prop-rooms">Nombre de pièces</label>
+                    <input type="number" id="prop-rooms" name="rooms" class="filter-control" placeholder="Ex: 5" min="1" required>
+                </div>
+                <div class="filter-group">
+                    <label for="prop-bedrooms">Nombre de chambres</label>
+                    <input type="number" id="prop-bedrooms" name="bedrooms" class="filter-control" placeholder="Ex: 3" min="0" required>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1.2fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="filter-group">
+                    <label for="prop-city">Ville</label>
+                    <input type="text" id="prop-city" name="city" class="filter-control" placeholder="Ex: Nice" required>
+                </div>
+                <div class="filter-group">
+                    <label for="prop-zip-code">Code Postal</label>
+                    <input type="text" id="prop-zip-code" name="zip_code" class="filter-control" placeholder="Ex: 06000" required>
+                </div>
+                <div class="filter-group">
+                    <label for="prop-agency">Agence responsable</label>
+                    <select id="prop-agency" name="agency_id" class="filter-control" required style="height: 44px;">
+                        {% for agency in agencies %}
+                        <option value="{{ agency.id }}" {% if agency.id == agent_agency_id %}selected{% endif %}>{{ agency.name }} ({{ agency.city }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div class="filter-group">
+                    <label for="prop-address">Adresse physique</label>
+                    <input type="text" id="prop-address" name="address" class="filter-control" placeholder="Ex: 15 Avenue des Fleurs" required>
+                </div>
+                <div class="filter-group">
+                    <label for="prop-image-url">URL de l'image (optionnel)</label>
+                    <input type="url" id="prop-image-url" name="image_url" class="filter-control" placeholder="Ex: https://images.unsplash.com/...">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 0.95rem; padding: 0.8rem 0;">Enregistrer le bien immobilier</button>
+            <div id="add-property-status-msg" style="margin-top: 1rem; text-align: center; font-size: 0.9rem; display: none;"></div>
+        </form>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}

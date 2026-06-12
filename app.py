@@ -88,7 +88,19 @@ def dashboard():
     """Page de tableau de bord commercial et management (sécurisée)."""
     if not session.get('agent_id'):
         return redirect(url_for('login'))
-    return render_template('dashboard.html')
+        
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, name, city FROM agencies ORDER BY name ASC")
+    agencies = [dict(row) for row in cursor.fetchall()]
+    
+    # Récupérer l'ID de l'agence du conseiller connecté pour pré-sélectionner
+    cursor.execute("SELECT agency_id FROM agents WHERE id = %s", (session['agent_id'],))
+    agent_info = cursor.fetchone()
+    agent_agency_id = agent_info['agency_id'] if agent_info else None
+    conn.close()
+    
+    return render_template('dashboard.html', agencies=agencies, agent_agency_id=agent_agency_id)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -103,7 +115,7 @@ def login():
         
         conn = get_db_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM agents WHERE LOWER(email) = ?", (email,))
+        cursor.execute("SELECT * FROM agents WHERE LOWER(email) = %s", (email,))
         agent = cursor.fetchone()
         conn.close()
         
@@ -152,19 +164,19 @@ def api_get_properties():
     params = []
     
     if city:
-        query += " AND p.city = ?"
+        query += " AND p.city = %s"
         params.append(city)
     if prop_type:
-        query += " AND p.type = ?"
+        query += " AND p.type = %s"
         params.append(prop_type)
     if max_price:
-        query += " AND p.price <= ?"
+        query += " AND p.price <= %s"
         params.append(max_price)
     if min_surface:
-        query += " AND p.surface >= ?"
+        query += " AND p.surface >= %s"
         params.append(min_surface)
     if rooms:
-        query += " AND p.rooms >= ?"
+        query += " AND p.rooms >= %s"
         params.append(rooms)
         
     query += " ORDER BY p.id DESC"
@@ -188,7 +200,7 @@ def api_get_property_detail(prop_id):
         FROM properties p
         JOIN agencies a ON p.agency_id = a.id
         JOIN agents ag ON p.agent_id = ag.id
-        WHERE p.id = ?
+        WHERE p.id = %s
     """, (prop_id,))
     row = cursor.fetchone()
     conn.close()
@@ -197,6 +209,73 @@ def api_get_property_detail(prop_id):
         return jsonify({"error": "Bien introuvable"}), 404
         
     return jsonify(dict(row))
+
+@app.route('/api/properties', methods=['POST'])
+def api_add_property():
+    """API pour ajouter un nouveau bien immobilier dans le catalogue."""
+    if not session.get('agent_id'):
+        return jsonify({"error": "Accès non autorisé. Veuillez vous connecter."}), 401
+        
+    data = request.get_json() or {}
+    
+    title = (data.get('title') or '').strip()
+    description = (data.get('description') or '').strip()
+    prop_type = (data.get('type') or '').strip()
+    price = data.get('price')
+    surface = data.get('surface')
+    rooms = data.get('rooms')
+    bedrooms = data.get('bedrooms')
+    city = (data.get('city') or '').strip()
+    address = (data.get('address') or '').strip()
+    zip_code = (data.get('zip_code') or '').strip()
+    year_built = data.get('year_built')
+    image_url = (data.get('image_url') or '').strip() or None
+    agency_id = data.get('agency_id')
+    agent_id = session.get('agent_id')
+    
+    if not (title and description and prop_type and price and surface and rooms and city and address and zip_code and agency_id):
+        return jsonify({"error": "Champs obligatoires manquants"}), 400
+        
+    try:
+        price = float(price)
+        surface = float(surface)
+        rooms = int(rooms)
+        bedrooms = int(bedrooms) if bedrooms else 0
+        year_built = int(year_built) if year_built else None
+        agency_id = int(agency_id)
+    except (ValueError, TypeError):
+        return jsonify({"error": "Format des données numériques incorrect"}), 400
+        
+    if prop_type not in ['maison', 'appartement', 'bureau', 'commercial']:
+        return jsonify({"error": "Type de bien invalide"}), 400
+        
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        cursor.execute("""
+            INSERT INTO properties (
+                title, description, type, status, price, surface, rooms, bedrooms, 
+                city, address, zip_code, year_built, image_url, agency_id, agent_id
+            ) VALUES (%s, %s, %s, 'available', %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, (
+            title, description, prop_type, price, surface, rooms, bedrooms,
+            city, address, zip_code, year_built, image_url, agency_id, agent_id
+        ))
+        conn.commit()
+        new_id = cursor.lastrowid
+        
+        # Réentraîner le modèle prédictif IA pour inclure ce nouveau bien dans les calculs
+        try:
+            valuation_service.train_model()
+        except Exception as te:
+            print(f"Erreur lors du réentraînement du modèle IA : {te}")
+            
+        return jsonify({"success": "Bien immobilier enregistré avec succès !", "property_id": new_id}), 201
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": f"Erreur lors de l'insertion en base : {e}"}), 500
+    finally:
+        conn.close()
 
 @app.route('/api/estimate', methods=['POST'])
 def api_estimate_price():
@@ -257,7 +336,7 @@ def api_submit_lead():
     try:
         cursor.execute("""
             INSERT INTO leads (name, email, phone, message, property_id, status)
-            VALUES (?, ?, ?, ?, ?, 'pending')
+            VALUES (%s, %s, %s, %s, %s, 'pending')
         """, (name, email, phone, message, property_id))
         conn.commit()
         lead_id = cursor.lastrowid
@@ -324,7 +403,7 @@ def api_dashboard_leads():
             return jsonify({"error": "Paramètres de mise à jour invalides"}), 400
             
         try:
-            cursor.execute("UPDATE leads SET status = ? WHERE id = ?", (new_status, lead_id))
+            cursor.execute("UPDATE leads SET status = %s WHERE id = %s", (new_status, lead_id))
             conn.commit()
             conn.close()
             return jsonify({"success": "Statut du prospect mis à jour avec succès"})
@@ -334,5 +413,7 @@ def api_dashboard_leads():
             return jsonify({"error": f"Erreur de mise à jour : {e}"}), 500
 
 if __name__ == '__main__':
-    # Activer le mode debug en local pour faciliter le développement
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Récupérer le port depuis l'environnement (défaut: 5000)
+    port = int(os.environ.get("PORT", 5000))
+    # Activer le mode debug mais désactiver le reloader pour éviter les crashs silencieux de sous-processus sur VM
+    app.run(debug=True, use_reloader=False, host='0.0.0.0', port=port)

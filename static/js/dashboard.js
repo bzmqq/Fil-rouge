@@ -347,4 +347,125 @@ document.addEventListener('DOMContentLoaded', () => {
             }, 150);
         });
     }
+
+    // ==========================================
+    // AJOUT DE BIENS IMMOBILIERS (MODALE & FORM)
+    // ==========================================
+    const addPropertyModal = document.getElementById('add-property-modal');
+    const btnAddProperty = document.getElementById('btn-add-property');
+    const addPropertyClose = document.getElementById('add-property-modal-close');
+    const addPropertyForm = document.getElementById('add-property-form');
+    const addPropertyStatusMsg = document.getElementById('add-property-status-msg');
+
+    if (btnAddProperty && addPropertyModal) {
+        // Ouvrir la modale
+        btnAddProperty.addEventListener('click', () => {
+            addPropertyModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            if (addPropertyStatusMsg) {
+                addPropertyStatusMsg.style.display = 'none';
+                addPropertyStatusMsg.textContent = '';
+            }
+        });
+
+        // Fermer la modale
+        const closeAddPropertyModal = () => {
+            addPropertyModal.classList.remove('active');
+            document.body.style.overflow = '';
+            addPropertyForm.reset();
+        };
+
+        if (addPropertyClose) {
+            addPropertyClose.addEventListener('click', closeAddPropertyModal);
+        }
+
+        addPropertyModal.addEventListener('click', (e) => {
+            if (e.target === addPropertyModal) closeAddPropertyModal();
+        });
+
+        // Accessibilité Échap
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && addPropertyModal.classList.contains('active')) {
+                closeAddPropertyModal();
+            }
+        });
+
+        // Soumission du formulaire
+        if (addPropertyForm) {
+            addPropertyForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const submitBtn = addPropertyForm.querySelector('button[type="submit"]');
+                
+                // Désactiver le bouton pendant le traitement
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Enregistrement en cours...';
+
+                if (addPropertyStatusMsg) {
+                    addPropertyStatusMsg.style.display = 'none';
+                    addPropertyStatusMsg.textContent = '';
+                }
+
+                // Récupérer les données du formulaire
+                const formData = new FormData(addPropertyForm);
+                const payload = {
+                    title: formData.get('title'),
+                    type: formData.get('type'),
+                    description: formData.get('description'),
+                    price: parseFloat(formData.get('price')),
+                    surface: parseFloat(formData.get('surface')),
+                    year_built: formData.get('year_built') ? parseInt(formData.get('year_built')) : null,
+                    rooms: parseInt(formData.get('rooms')),
+                    bedrooms: parseInt(formData.get('bedrooms')),
+                    city: formData.get('city'),
+                    zip_code: formData.get('zip_code'),
+                    agency_id: parseInt(formData.get('agency_id')),
+                    address: formData.get('address'),
+                    image_url: formData.get('image_url') || null
+                };
+
+                fetch('/api/properties', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.error) {
+                        if (addPropertyStatusMsg) {
+                            addPropertyStatusMsg.style.color = '#ef4444';
+                            addPropertyStatusMsg.textContent = `❌ ${data.error}`;
+                            addPropertyStatusMsg.style.display = 'block';
+                        }
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Enregistrer le bien immobilier';
+                    } else {
+                        if (addPropertyStatusMsg) {
+                            addPropertyStatusMsg.style.color = '#10b981';
+                            addPropertyStatusMsg.textContent = `✅ ${data.success}`;
+                            addPropertyStatusMsg.style.display = 'block';
+                        }
+                        // Actualiser les statistiques globales du dashboard
+                        loadDashboardData();
+                        
+                        // Fermer la modale après un court délai
+                        setTimeout(() => {
+                            closeAddPropertyModal();
+                            submitBtn.disabled = false;
+                            submitBtn.textContent = 'Enregistrer le bien immobilier';
+                        }, 2000);
+                    }
+                })
+                .catch(err => {
+                    console.error("Erreur lors de l'ajout du bien:", err);
+                    if (addPropertyStatusMsg) {
+                        addPropertyStatusMsg.style.color = '#ef4444';
+                        addPropertyStatusMsg.textContent = "⚠️ Erreur réseau, impossible d'enregistrer le bien.";
+                        addPropertyStatusMsg.style.display = 'block';
+                    }
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Enregistrer le bien immobilier';
+                });
+            });
+        }
+    }
 });

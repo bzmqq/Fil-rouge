@@ -1,4 +1,3 @@
-import sqlite3
 import random
 import os
 import sys
@@ -6,7 +5,7 @@ from datetime import datetime, timedelta
 
 # Ajouter le chemin parent pour pouvoir importer db_manager
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from database.db_manager import get_db_connection, init_db, DB_PATH
+from database.db_manager import get_db_connection, init_db
 
 # Villes et tarifs de base au m² (médianes réalistes en France)
 CITIES_STATS = {
@@ -97,15 +96,7 @@ def generate_price(city, prop_type, surface, rooms, age_years=10, is_transaction
     return round(final_price, -2) # Arrondi à la centaine d'euros près
 
 def seed_database():
-    # Supprimer la base de données existante pour repartir de zéro
-    if os.path.exists(DB_PATH):
-        try:
-            os.remove(DB_PATH)
-            print("Ancienne base de données supprimée pour un seeding propre.")
-        except Exception as e:
-            print(f"Note: Impossible de supprimer l'ancienne base : {e}")
-            
-    # S'assurer que le fichier DB et le schéma sont initialisés
+    # S'assurer que les tables de la DB MySQL sont réinitialisées et créées
     init_db()
     
     conn = get_db_connection()
@@ -142,7 +133,7 @@ def seed_database():
         
     cursor.executemany("""
         INSERT INTO agencies (name, city, address, phone, email, manager_name)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s)
     """, agencies_data)
     conn.commit()
     
@@ -194,7 +185,7 @@ def seed_database():
     
     cursor.executemany("""
         INSERT INTO agents (name, email, phone, role, agency_id)
-        VALUES (?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s)
     """, agents_data)
     conn.commit()
     
@@ -267,7 +258,7 @@ def seed_database():
             INSERT INTO properties (
                 title, description, type, status, price, surface, rooms, bedrooms,
                 city, address, zip_code, latitude, longitude, year_built, image_url, agency_id, agent_id
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """, (
             title, description, prop_type, 'sold', price, surface, rooms, bedrooms,
             city, address, zip_code, None, None, year_built, image_url, a_id, ag_id
@@ -287,7 +278,7 @@ def seed_database():
         
     cursor.executemany("""
         INSERT INTO transactions (property_id, client_name, client_email, client_phone, agent_id, price, type, date)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """, transactions_data)
     conn.commit()
     
@@ -380,7 +371,7 @@ def seed_database():
         INSERT INTO properties (
             title, description, type, status, price, surface, rooms, bedrooms,
             city, address, zip_code, latitude, longitude, year_built, image_url, agency_id, agent_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     """, properties_data)
     conn.commit()
     
@@ -410,7 +401,7 @@ def seed_database():
         
     cursor.executemany("""
         INSERT INTO leads (name, email, phone, message, property_id, status)
-        VALUES (?, ?, ?, ?, ?, ?)
+        VALUES (%s, %s, %s, %s, %s, %s)
     """, leads_data)
     conn.commit()
     

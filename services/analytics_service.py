@@ -92,7 +92,7 @@ class AnalyticsService:
         # Requête pour extraire l'année et le mois et regrouper
         cursor.execute("""
             SELECT 
-                strftime('%Y-%m', date) as month_label,
+                DATE_FORMAT(date, '%Y-%m') as month_label,
                 COUNT(id) as sales_count,
                 SUM(price) as monthly_revenue
             FROM transactions
